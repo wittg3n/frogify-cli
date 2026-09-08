@@ -25,6 +25,10 @@ With **Python 3.12+**, [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.ht
 
 ```shell
 pipx install "git+https://github.com/wittg3n/frogify-cli.git"
+```
+then:
+
+```shell
 frogify "Massive Attack - Teardrop"
 ```
 
