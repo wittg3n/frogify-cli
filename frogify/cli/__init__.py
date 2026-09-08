@@ -1,0 +1,1 @@
+"""Frogify command-line interface."""

@@ -1,0 +1,64 @@
+# Python environments and bytecode
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Test and lint artifacts
+.pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+/htmlcov/
+/coverage.xml
+
+# Build artifacts (keep pyproject.toml and uv.lock in Git)
+/build/
+/dist/
+*.egg-info/
+.eggs/
+
+# Local secrets; sanitized examples can be committed
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Personal libraries and CSV exports
+/downloads/
+/music/
+/spotify/
+/data/*
+!/data/.gitkeep
+!/data/README.md
+
+# Frogify state, legacy reports, and interrupted downloads
+frogify.db
+frogify.db-*
+frogify.log
+frogify.log.*
+downloaded_tracks.csv
+failed_tracks.csv
+.frogify-*/
+*.aria2
+*.tagging.tmp.mp3
+
+# Audio saved in the repository root; allow fixtures under tests/
+/*.mp3
+/*.m4a
+/*.aac
+/*.ogg
+/*.opus
+/*.wav
+/*.flac
+/*.webm
+/*.mp4
+
+# OS and editor temporary files
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~

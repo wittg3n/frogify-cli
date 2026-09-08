@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "frogify"
+version = "2.0.0"
+description = "Professional MP3Juice/Theta CLI for tracks and Spotify CSV batches."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+dependencies = [
+    "click>=8.1,<9",
+    "mutagen>=1.47,<2",
+    "platformdirs>=4.3,<5",
+    "rapidfuzz>=3.10,<4",
+    "requests>=2.32,<3",
+    "rich>=13.9,<15",
+    "typer>=0.16,<1",
+]
+
+[project.scripts]
+frogify = "frogify.cli.app:main"
+
+[dependency-groups]
+dev = ["pyright>=1.1.400", "pytest>=8,<9", "ruff>=0.12"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["frogify", "mp3juice"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/frogify", "/mp3juice", "/tests", "/public/logo.png", "/README.md", "/CHANGELOG.md", "/LICENSE", "/pyproject.toml", "/uv.lock"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["mp3juice_standalone.egg-info"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008"]
+
+[tool.pyright]
+include = ["frogify", "mp3juice"]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+venvPath = "."
+venv = ".venv"
