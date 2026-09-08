@@ -5,10 +5,36 @@ build-backend = "hatchling.build"
 [project]
 name = "frogify"
 version = "2.0.0"
-description = "Professional MP3Juice/Theta CLI for tracks and Spotify CSV batches."
+description = "Spotify and YouTube Music downloader CLI with smart track matching, metadata tagging, and resumable batch downloads."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = [
+    "spotify",
+    "spotify-downloader",
+    "spotify-playlist-downloader",
+    "youtube",
+    "youtube-music",
+    "youtube-music-downloader",
+    "music-downloader",
+    "playlist-downloader",
+    "audio-downloader",
+    "cli",
+    "terminal",
+    "ffmpeg",
+    "metadata",
+    "soundcloud",
+]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Utilities",
+]
 dependencies = [
     "click>=8.1,<9",
     "mutagen>=1.47,<2",
@@ -22,6 +48,13 @@ dependencies = [
 [project.scripts]
 frogify = "frogify.cli.app:main"
 
+[project.urls]
+Homepage = "https://github.com/wittg3n/frogify-cli"
+Documentation = "https://github.com/wittg3n/frogify-cli/tree/main/docs"
+Repository = "https://github.com/wittg3n/frogify-cli"
+Issues = "https://github.com/wittg3n/frogify-cli/issues"
+Changelog = "https://github.com/wittg3n/frogify-cli/blob/main/CHANGELOG.md"
+
 [dependency-groups]
 dev = ["pyright>=1.1.400", "pytest>=8,<9", "ruff>=0.12"]
 
@@ -29,7 +62,7 @@ dev = ["pyright>=1.1.400", "pytest>=8,<9", "ruff>=0.12"]
 packages = ["frogify", "mp3juice"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/frogify", "/mp3juice", "/tests", "/public/logo.png", "/README.md", "/CHANGELOG.md", "/LICENSE", "/pyproject.toml", "/uv.lock"]
+include = ["/frogify", "/mp3juice", "/tests", "/docs", "/public/logo.png", "/public/demo.gif", "/README.md", "/CONTRIBUTING.md", "/CHANGELOG.md", "/LICENSE", "/pyproject.toml", "/uv.lock"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

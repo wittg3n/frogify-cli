@@ -52,7 +52,7 @@ class RootQueryGroup(TyperGroup):
 app = typer.Typer(
     cls=RootQueryGroup,
     name="frogify",
-    help="Professional MP3Juice/Theta music downloader.",
+    help="Spotify & YouTube Music downloader CLI. Import Spotify CSVs or search recordings.",
     no_args_is_help=True,
     add_completion=False,
 )
@@ -150,7 +150,7 @@ def _print_candidates(query: str, ranked: list[RankedCandidate]) -> None:
     table.add_column("Result")
     table.add_column("Source")
     table.add_column("Duration", justify="right")
-    table.add_column("Score", justify="right")
+    table.add_column("Match / 100", justify="right")
     for index, candidate in enumerate(ranked, 1):
         result = candidate.result
         table.add_row(
@@ -195,6 +195,11 @@ def download_query(
                 progress_callback=callbacks.on_download_progress,
                 status_callback=callbacks.on_status,
             )
+        console.print(
+            f"Matched: {_safe_text(result.candidate.result.title)} "
+            f"({result.candidate.score:.1f}/100)",
+            markup=False,
+        )
         saved = "✓ Saved" if "utf" in console.encoding.casefold() else "Saved"
         console.print(f"\n[green]{saved}[/]\n{_safe_text(result.path)}")
     except (FrogifyError, ValueError, OSError, sqlite3.Error) as exc:

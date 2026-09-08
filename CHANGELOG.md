@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Clarify Spotify/YouTube Music downloader positioning, explain CSV-based Spotify support,
+  and tighten the README's product-first layout and installation hierarchy.
+- Prepare the first public release with a shorter README, terminal demo, installation and usage
+  guides, contribution templates, and complete package discovery metadata.
+- Add Python 3.12/3.13 CI on Ubuntu, Windows, and macOS, distribution smoke checks, and a
+  release-triggered PyPI Trusted Publishing workflow.
+- Label search scores out of 100 and show the selected title and score after a download.
 - Default downloads to the current user's system Downloads/music folder on Windows, macOS,
   Linux, and other supported platforms, while retaining explicit directory overrides.
 - Preserve existing audio on failed forced replacement; publish completed files without

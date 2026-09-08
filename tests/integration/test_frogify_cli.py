@@ -64,6 +64,9 @@ def test_root_query_and_named_search_route_distinctly(monkeypatch):
     assert root.exit_code == 0, root.stdout
     assert search.exit_code == 0, search.stdout
     assert service.calls == [("download", "Adele Hello"), ("search", "Adele Hello")]
+    assert "Matched: Adele - Hello (98.7/100)" in root.stdout
+    assert "Match / 100" in search.stdout
+    assert "98.7" in search.stdout
 
 
 def test_batch_retry_doctor_and_config_commands(tmp_path, monkeypatch):
