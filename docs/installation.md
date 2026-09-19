@@ -2,41 +2,90 @@
 
 [Back to Frogify](../README.md)
 
-## Quick install from GitHub
+## Standalone installation
 
-With Python 3.12+, [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html), and Git installed:
+The standalone Linux installer currently supports **x86_64 / amd64 glibc-based Linux**,
+with glibc 2.17 or newer. Examples include Ubuntu, Debian, Linux Mint, Fedora, Rocky Linux,
+AlmaLinux, CentOS Stream, and RHEL-compatible distributions; not every version is guaranteed.
+The binary is built in official PyPA manylinux2014 and tested on glibc 2.17 in CI.
+Version 0.2.0 is a pre-1.0 candidate; publication is blocked until the
+[standalone compliance review](../packaging/THIRD_PARTY_NOTICES.md) is resolved.
+There is no ARM64, Windows, macOS, or Alpine/musl standalone binary in this release.
 
-```shell
-pipx install "git+https://github.com/wittg3n/frogify-cli.git"
-pipx ensurepath
+```sh
+curl -fsSL https://raw.githubusercontent.com/wittg3n/frogify-cli/main/install.sh | sh
+frogify --version
+frogify --help
+frogify doctor
+frogify "Massive Attack - Teardrop"
 ```
 
-Or use uv and Git; uv can install Python for you:
+No Python, pip, pipx, uv, virtualenv, or Git is required. The installer requires standard Unix
+tools, curl, tar/gzip, and either `sha256sum` or `shasum`. It resolves GitHub's latest-release
+redirect once, then downloads both assets from that exact release tag. The release must
+contain `frogify-linux-x86_64.tar.gz` and `frogify-linux-x86_64.tar.gz.sha256`;
+the installer is usable once the first release with those assets has been published.
 
-```shell
-uv tool install --python 3.13 "git+https://github.com/wittg3n/frogify-cli.git"
-uv tool update-shell
+The default binary path is **`$HOME/.local/bin/frogify`**. If the directory is not in PATH,
+the installer prints it so you can add it to your shell's PATH. It never edits shell startup
+files, invokes sudo, or installs OS packages. For immediate use, run
+`"$HOME/.local/bin/frogify" --version`. PyInstaller's single executable unpacks private runtime
+files on launch, so its temporary directory must permit execution; set `TMPDIR` if necessary.
+
+### Choose a version or directory
+
+Download the script first, then pass overrides to the shell that executes it:
+
+```sh
+curl -fsSL \
+  https://raw.githubusercontent.com/wittg3n/frogify-cli/main/install.sh \
+  -o frogify-install.sh
+FROGIFY_VERSION=0.2.0 sh frogify-install.sh
 ```
 
-Open a new terminal, then run `frogify --help`. These are source installs while the first
-PyPI release is being prepared. FFmpeg is a separate system dependency for CSV metadata;
-aria2 is optional. Follow the platform setup below if you need those tools or a source ZIP.
+`FROGIFY_VERSION=v0.2.0` also works. To choose a writable destination:
 
-## Platform setup
+```sh
+FROGIFY_INSTALL_DIR="$HOME/bin" sh frogify-install.sh
+```
 
-Frogify requires **Python 3.12 or newer**. The recommended installation uses
-[uv](https://docs.astral.sh/uv/getting-started/installation/) to manage Python and give Frogify
-its own environment. You do not need to activate a virtual environment for everyday use.
+`FROGIFY_INSTALL_DIR=/usr/local/bin` is supported when you already have write permission;
+the installer will not elevate privileges. Rerun the installer to update. It checks SHA-256
+before extraction, stages the replacement on the destination filesystem, and replaces the
+old executable only after successful validation. Download or checksum failures preserve it.
+To uninstall, remove the installed `frogify` file; your configuration and audio remain.
+
+## Python package installation
+
+This route requires **Python 3.12+** and is also available on Windows and macOS.
+Once the PyPI release exists, install in your chosen Python environment:
+
+```sh
+pip install frogify
+```
+
+Alternatively, [uv](https://docs.astral.sh/uv/getting-started/installation/) can manage Python
+and an isolated tool environment: `uv tool install --python 3.13 frogify`.
+Until PyPI is published, use `uv tool install --python 3.13 "git+https://github.com/wittg3n/frogify-cli.git"`
+(requires Git), or the [checkout/ZIP instructions](#install-frogify-from-a-checkout).
+Run `uv tool update-shell` if needed, then reopen your terminal.
+
+## System dependencies
+
+The standalone executable bundles the Python runtime and packages. **FFmpeg and ffprobe
+remain external**, and **aria2 is optional**. `frogify doctor` reports missing tools and
+provider reachability; it may exit nonzero when required tools or providers are unavailable.
 
 | Component | When you need it |
 | --- | --- |
-| Python 3.12+ | Required; uv can install it for supported platforms. |
-| Git | Needed to clone this repository; downloading and extracting its source ZIP also works. |
+| Python 3.12+ | Python package/source installation only; bundled in the Linux executable. |
+| Git | Source clones only; not needed by the Linux installer or PyPI installation. |
 | FFmpeg | Required for batch metadata, enabled by default. |
 | ffprobe | Fallback audio-duration validation; normally included with FFmpeg. |
-| aria2 | Optional acceleration for final audio transfers. Its command is `aria2c`. |
+| aria2 | Optional in `auto` mode; required when `download.engine = "aria2"`. Its command is `aria2c`. |
 
-**Choose your platform below, then follow [Install Frogify](#install-frogify-from-a-checkout).**
+Choose the platform instructions below for system tools. Windows/macOS users can also follow
+the [source installation](#install-frogify-from-a-checkout) route.
 
 ### Windows
 
@@ -93,7 +142,7 @@ access; on a root shell, omit `sudo`.
 
 ```bash
 sudo apt update
-sudo apt install git curl ffmpeg aria2
+sudo apt install curl ffmpeg aria2
 ```
 
 Ubuntu's [FFmpeg package](https://packages.ubuntu.com/noble/ffmpeg) is in the Universe
@@ -111,7 +160,7 @@ sudo apt install ffmpeg
 <summary><strong>Fedora</strong></summary>
 
 ```bash
-sudo dnf install git curl ffmpeg-free aria2
+sudo dnf install curl ffmpeg-free aria2
 ```
 
 Fedora provides [ffmpeg-free](https://packages.fedoraproject.org/pkgs/ffmpeg/) and
@@ -127,7 +176,7 @@ See [FFmpeg's package links](https://www.ffmpeg.org/download.html) for alternati
 Install the base tools:
 
 ```bash
-sudo dnf install git curl
+sudo dnf install curl
 ```
 
 Enable the repositories appropriate to your distribution and release using the
@@ -147,7 +196,7 @@ one of the [FFmpeg project-linked builds or repositories](https://www.ffmpeg.org
 <summary><strong>Arch Linux · EndeavourOS · Manjaro</strong></summary>
 
 ```bash
-sudo pacman -Syu git curl ffmpeg aria2
+sudo pacman -Syu curl ffmpeg aria2
 ```
 
 This refreshes and upgrades the system before installing packages, following Arch's rolling
@@ -160,7 +209,7 @@ release model. [FFmpeg is available in Extra](https://archlinux.org/packages/ext
 
 ```bash
 sudo zypper refresh
-sudo zypper install git curl aria2
+sudo zypper install curl aria2
 zypper search -s ffmpeg
 ```
 
@@ -172,6 +221,8 @@ if additional codec support is needed. Check that `ffmpeg` and `ffprobe` are ava
 
 <details>
 <summary><strong>Alpine Linux</strong></summary>
+
+Use the Python package/source route on Alpine; the glibc standalone binary does not support musl.
 
 Run as root, or use your configured privilege tool:
 
@@ -207,7 +258,11 @@ for repository setup.
 
 </details>
 
-After installing the system tools, install uv with its
+## Development/source installation
+
+Linux standalone users can skip this section. For Python/source installation, install Git
+using your distribution's package manager if you plan to clone, or download a source ZIP.
+If you choose uv, install it with its
 [official Linux installer](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```sh
@@ -317,11 +372,8 @@ Use a Nixpkgs revision providing Python 3.12+ and the listed dependencies.
 
 ## Updating and uninstalling
 
-For the GitHub installs above, use the command matching your installer:
-
-```shell
-pipx upgrade frogify
-```
+For standalone Linux installs, rerun `install.sh` (with the same directory override, if used).
+For Python packages, use `pip install --upgrade frogify` or the matching uv command:
 
 ```shell
 uv tool upgrade frogify
@@ -341,9 +393,7 @@ inside their activated environment.
 
 To remove the command, use the matching installer:
 
-```shell
-pipx uninstall frogify
-```
+For standalone installs, delete the installed executable. For pip, use `pip uninstall frogify`.
 
 ```shell
 uv tool uninstall frogify

@@ -156,6 +156,7 @@ class Database:
         error_type: str,
         error_message: str,
         retryable: bool,
+        overwrite: bool = True,
     ) -> None:
         with self.connect() as db:
             db.execute(
@@ -171,6 +172,13 @@ class Database:
                     path=excluded.path, error_type=excluded.error_type,
                     error_message=excluded.error_message, retryable=excluded.retryable,
                     updated_at=excluded.updated_at
+                """
+                if overwrite
+                else """
+                INSERT OR IGNORE INTO downloads(
+                    identity, status, query, track_uri, title, artists,
+                    request_json, path, error_type, error_message, retryable, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     identity,
@@ -234,34 +242,28 @@ class Database:
                         "duration_s": str(row.get("expected_duration_s") or "0"),
                         "output_dir": str(path.parent.resolve()),
                     }
-                    if kind == "success":
-                        # An import is a seed, never a replacement for current app state.
-                        if self.is_success(identity):
-                            continue
-                        recorded_path = Path(str(row.get("file") or ""))
-                        if row.get("file") and not recorded_path.is_absolute():
-                            recorded_path = path.parent / recorded_path
-                        self.record_success(
-                            identity,
-                            track_uri=uri,
-                            title=title,
-                            artists=artists,
-                            request=request,
-                            path=str(recorded_path.resolve()) if row.get("file") else "",
-                        )
-                    else:
-                        if self.is_success(identity):
-                            imported += 1
-                            continue
-                        self.record_failure(
-                            identity,
-                            track_uri=uri,
-                            title=title,
-                            artists=artists,
-                            request=request,
-                            error_type="LegacyFailure",
-                            error_message=str(row.get("reason") or "legacy failure"),
-                        )
+                    recorded_path = Path(str(row.get("file") or ""))
+                    if row.get("file") and not recorded_path.is_absolute():
+                        recorded_path = path.parent / recorded_path
+                    # Current retry/success state wins, including concurrent writes.
+                    self._upsert(
+                        identity,
+                        status=kind,
+                        query="",
+                        track_uri=uri,
+                        title=title,
+                        artists=artists,
+                        request=request,
+                        path=str(recorded_path.resolve())
+                        if kind == "success" and row.get("file")
+                        else "",
+                        error_type="LegacyFailure" if kind == "failure" else "",
+                        error_message=str(row.get("reason") or "legacy failure")
+                        if kind == "failure"
+                        else "",
+                        retryable=kind == "failure",
+                        overwrite=False,
+                    )
                     imported += 1
             with self.connect() as db:
                 db.execute(

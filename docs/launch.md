@@ -45,17 +45,21 @@ an isolated deterministic fixture. Keep recordings free of personal paths and cr
 
 ## Ship the reviewed changes
 
-From the repository in PowerShell, review and commit the existing launch work together with
-this correction pass. The explicit paths include the demo and exclude personal data and builds:
+From the repository in PowerShell, inspect all changes before staging. Check both tracked and
+untracked files: private exports, credentials, audio, local state and generated build/audit
+outputs must not be included. Review the complete staged diff before committing; unstage any
+unintended file with `git restore --staged -- <path>` (this retains the working file).
 
 ```powershell
 git diff --check
+git status --short
 git diff
-git switch -c codex/launch-positioning
-git add README.md pyproject.toml frogify/cli/app.py tests/integration/test_frogify_cli.py CHANGELOG.md CONTRIBUTING.md docs .github public/demo.gif
+git switch -c codex/release-0.2.0
+git add -A
 git diff --cached --stat
-git commit -m "Prepare Frogify launch and Spotify/YouTube Music positioning"
-git push -u origin codex/launch-positioning
+git diff --cached
+git commit -m "Prepare Frogify v0.2.0 release candidate"
+git push -u origin codex/release-0.2.0
 ```
 
 Open a pull request, wait for the six test combinations and package checks, then merge through

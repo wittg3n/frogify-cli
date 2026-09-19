@@ -20,6 +20,15 @@ def rank_free_text(query: str, results: list[SearchResult]) -> list[RankedCandid
         score = float(fuzz.WRatio(query_core, title_core)) * 0.65
         score += float(fuzz.token_set_ratio(query_core, title_core)) * 0.35
         reasons: list[str] = []
+        # Partial/token-set scores can reward only the title or only the artist.
+        # Require every query token to have its own close counterpart for auto-pick.
+        remaining = title_core.split()
+        for token in sorted(set(query_core.split()), key=len, reverse=True):
+            match = max(remaining, key=lambda word: fuzz.ratio(token, word), default="")
+            if fuzz.ratio(token, match) < 85:
+                reasons.append("incomplete query identity")
+                break
+            remaining.remove(match)
         for qualifier, penalty in VERSION_QUALIFIERS.items():
             if contains_phrase(title_core, qualifier) and not contains_phrase(
                 query_core, qualifier

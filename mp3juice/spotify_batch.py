@@ -105,7 +105,8 @@ class SpotifyTrack:
         return seconds_to_hms(self.duration_s)
 
     @classmethod
-    def from_csv_row(cls, row_number: int, row: dict[str, str]) -> SpotifyTrack:
+    def from_csv_row(cls, row_number: int, row: dict[str, str | None]) -> SpotifyTrack:
+        row = {key: "" if value is None else str(value).strip() for key, value in row.items()}
         required = ("Track URI", "Track Name", "Artist Name(s)", "Duration (ms)")
         missing = [name for name in required if not str(row.get(name, "")).strip()]
         if missing:
@@ -320,6 +321,14 @@ def _artist_similarity(track: SpotifyTrack, result: SearchResult) -> float:
 def _qualifier_penalty(track: SpotifyTrack, result: SearchResult) -> tuple[float, list[str]]:
     target = normalize_text(track.track_name)
     candidate = normalize_text(result.title)
+    # Remove recognized artist credit at the title boundary, never occurrences
+    # inside the track portion (Live - Lightning Crashes (Live) stays live).
+    for artist in sorted(track.artists, key=len, reverse=True):
+        credit = normalize_text(artist)
+        if credit and candidate.startswith(credit + " "):
+            candidate = candidate[len(credit) :].strip()
+        elif credit and normalize_text(re.split(r"\s[-–—|:]\s", result.title)[-1]) == credit:
+            candidate = candidate[: -len(credit)].strip()
     penalty = 0.0
     reasons: list[str] = []
 
@@ -864,8 +873,12 @@ class SpotifyTrackDownloader:
                 )
                 # Stage on the destination volume; failed tagging never touches old audio.
                 with tempfile.TemporaryDirectory(prefix=".frogify-", dir=self.output_dir) as work:
-                    extension = song.ext.lstrip(".").casefold() or "mp3"
-                    raw_path = available_audio_path(Path(work), "source", extension)
+                    extension = song.ext.lstrip(".").casefold()
+                    raw_path = (
+                        available_audio_path(Path(work), "source", extension)
+                        if extension
+                        else Path(work) / "source"
+                    )
                     raw_path.write_bytes(song.downloaded_contents)
                     actual = song.duration_s or probe_duration(raw_path)
                     if actual is None or not math.isfinite(actual) or actual <= 0:
@@ -880,6 +893,8 @@ class SpotifyTrackDownloader:
                     difference = abs(actual - track.duration_s)
                     if difference > self.duration_tolerance_s:
                         raise DownloadError(f"downloaded duration differs by {difference:.1f}s")
+                    if not extension and not self.metadata_enabled:
+                        raise DownloadError("Cannot determine the downloaded audio format")
                     staged = raw_path
                     if self.metadata_enabled:
                         self._status("writing Spotify metadata")

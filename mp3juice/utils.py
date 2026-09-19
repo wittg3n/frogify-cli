@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from mutagen import File as MutagenFile
+from mutagen import MutagenError
 
 INVALID_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
 WHITESPACE = re.compile(r"\s+")
@@ -113,6 +114,8 @@ def guess_extension(
     url: str,
     content_type: str | None = None,
     default: str = "mp3",
+    *,
+    data: bytes = b"",
 ) -> str:
     content_type = (content_type or "").split(";", 1)[0].strip().lower()
 
@@ -135,6 +138,16 @@ def guess_extension(
 
     if content_type in content_type_map:
         return content_type_map[content_type]
+
+    if data:
+        try:
+            audio = MutagenFile(io.BytesIO(data))
+        except (MutagenError, ValueError, OSError):
+            audio = None
+        if audio is not None:
+            for mime in audio.mime:
+                if mime in content_type_map:
+                    return content_type_map[mime]
 
     path = urlparse(url).path
     suffix = Path(path).suffix.lower().lstrip(".")

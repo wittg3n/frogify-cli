@@ -54,6 +54,8 @@ def run_doctor(
     for executable in ("aria2c", "ffmpeg", "ffprobe"):
         found = shutil.which(executable)
         required = executable == "ffmpeg" and bool(values and values["metadata"]["enabled"])
+        if executable == "aria2c":
+            required = bool(values and values["download"]["engine"] == "aria2")
         checks.append(Diagnostic(executable, bool(found), found or "not found", required))
     for module in ("requests", "mutagen"):
         checks.append(Diagnostic(module, importlib.util.find_spec(module) is not None, "installed"))

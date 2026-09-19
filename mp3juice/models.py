@@ -50,15 +50,18 @@ class SongInfo:
         return bool(self.download_url)
 
     def save(self, directory: str | Path = "downloads") -> Path:
+        from .exceptions import DownloadError
         from .utils import available_audio_path, publish_audio
 
         if not self.downloaded_contents:
             raise ValueError("SongInfo does not contain downloaded audio bytes.")
+        if not self.ext:
+            raise DownloadError("Cannot determine the downloaded audio format")
 
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
 
-        path = available_audio_path(directory, self.song_name, self.ext or "mp3")
+        path = available_audio_path(directory, self.song_name, self.ext)
         with TemporaryDirectory(prefix=".frogify-", dir=directory) as work:
             staged = Path(work) / "audio"
             staged.write_bytes(self.downloaded_contents)

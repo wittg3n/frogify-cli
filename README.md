@@ -21,19 +21,31 @@
 
 ## Quick start
 
-With **Python 3.12+**, [pipx](https://pipx.pypa.io/latest/how-to/install-pipx.html), and Git:
+On Linux x86_64, install the standalone executable. No Python, pip, uv, or Git is needed:
 
 ```shell
-pipx install "git+https://github.com/wittg3n/frogify-cli.git"
+curl -fsSL https://raw.githubusercontent.com/wittg3n/frogify-cli/main/install.sh | sh
 ```
 then:
 
 ```shell
+frogify --version
+frogify doctor
 frogify "Massive Attack - Teardrop"
 ```
 
-*Temporary GitHub install: the first PyPI release is not published yet.*
-Prefer uv? See [Installation](#installation).
+The installer uses published GitHub Release assets and installs to `$HOME/.local/bin`.
+Follow its PATH guidance if needed. A release containing the standalone assets must be
+published before this command can install Frogify.
+
+Version 0.2.0 is an early public pre-1.0 release candidate. Standalone publication is
+currently blocked by the [distribution compliance review](packaging/THIRD_PARTY_NOTICES.md).
+
+The standalone Linux installer currently supports **x86_64 glibc-based Linux distributions**
+(glibc 2.17 or newer), such as Ubuntu, Debian, Linux Mint, Fedora, Rocky Linux, AlmaLinux,
+and CentOS Stream. This does not guarantee every version of these distributions.
+Alpine/musl and ARM64 are not supported by this binary.
+For Windows, macOS, or Python package installation, see [Installation](#installation).
 
 ## Why Frogify?
 
@@ -104,7 +116,19 @@ CSV metadata tagging uses FFmpeg, copying MP3 input without re-encoding and conv
 
 ## Installation
 
-Use the pipx command in [Quick start](#quick-start), or let **uv** manage Python:
+Linux users should use the standalone installer in [Quick start](#quick-start).
+Rerun it to update; checksums are mandatory and failed downloads leave the old binary intact.
+
+### Python package installation
+
+For developers and users who explicitly want the Python package (including Windows/macOS),
+use Python 3.12+ in an appropriate environment. Once the PyPI release is available:
+
+```shell
+pip install frogify
+```
+
+Or let **uv** manage Python. Until the PyPI release is available, use the source route:
 
 ```shell
 uv tool install --python 3.13 "git+https://github.com/wittg3n/frogify-cli.git"

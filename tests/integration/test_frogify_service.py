@@ -145,6 +145,9 @@ def test_pick_uses_displayed_result_without_second_search(setup, monkeypatch):
         ("Artist Song", "Unrelated recording"),
         ("Artist Song", "Artist Song Live"),
         ("Artist Song Live", "Artist Song"),
+        ("Adele Hello", "Lionel Richie - Hello"),
+        ("Adele Hello", "Adele"),
+        ("Adele Hello", "Hello"),
     ],
 )
 def test_automatic_download_rejects_unsafe_matches(setup, query, title):
@@ -154,6 +157,23 @@ def test_automatic_download_rejects_unsafe_matches(setup, query, title):
         service.download(FreeTextRequest(query))
     assert client.downloads == []
     assert len(service.database.failures()) == 1
+
+
+@pytest.mark.parametrize("title", ["Adele - Hello (Official Audio)", "Hello - Adele", "Adele Helo"])
+def test_strong_identity_still_downloads(setup, title):
+    service, client, _ = setup
+    client.results = [SearchResult("good", title, "YouTube", 180)]
+    assert service.download(FreeTextRequest("Adele Hello")).path.is_file()
+    assert client.downloads == ["good"]
+
+
+def test_pick_can_explicitly_select_incomplete_identity(setup, monkeypatch):
+    service, client, _ = setup
+    client.results = [SearchResult("picked", "Hello", "YouTube", 180)]
+    monkeypatch.setattr(cli, "_service", lambda: service)
+    invoked = CliRunner().invoke(cli.app, ["Adele Hello", "--pick"], input="1\n")
+    assert invoked.exit_code == 0, invoked.output
+    assert client.downloads == ["picked"]
 
 
 def test_search_failure_is_friendly_persisted_and_retry_restores_options(setup, monkeypatch):

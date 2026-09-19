@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "frogify"
-version = "2.0.0"
+version = "0.2.0"
 description = "Spotify and YouTube Music downloader CLI with smart track matching, metadata tagging, and resumable batch downloads."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -56,13 +56,18 @@ Issues = "https://github.com/wittg3n/frogify-cli/issues"
 Changelog = "https://github.com/wittg3n/frogify-cli/blob/main/CHANGELOG.md"
 
 [dependency-groups]
-dev = ["pyright>=1.1.400", "pytest>=8,<9", "ruff>=0.12"]
+binary-build = [
+    "ninja==1.13.2",
+    "pyinstaller==6.22.0",
+    "scikit-build-core==1.0.3",
+]
+dev = ["pyright>=1.1.400", "pytest>=9.0.3,<10", "ruff>=0.12"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["frogify", "mp3juice"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/frogify", "/mp3juice", "/tests", "/docs", "/public/logo.png", "/public/demo.gif", "/README.md", "/CONTRIBUTING.md", "/CHANGELOG.md", "/LICENSE", "/pyproject.toml", "/uv.lock"]
+include = ["/frogify", "/mp3juice", "/tests", "/docs", "/packaging", "/install.sh", "/public/logo.png", "/README.md", "/CONTRIBUTING.md", "/CHANGELOG.md", "/LICENSE", "/pyproject.toml", "/uv.lock"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

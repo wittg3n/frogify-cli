@@ -122,13 +122,17 @@ class Aria2RPCDownloader:
         if os.name == "nt" and hasattr(subprocess, "CREATE_NO_WINDOW"):
             creationflags = subprocess.CREATE_NO_WINDOW
 
-        self._process = subprocess.Popen(
-            args,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            creationflags=creationflags,
-        )
+        try:
+            self._process = subprocess.Popen(
+                args,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=creationflags,
+            )
+        except OSError as exc:
+            self.close()
+            raise Aria2Unavailable(f"Cannot start aria2c: {exc}") from exc
 
         deadline = time.monotonic() + 4.0
         last_error: Exception | None = None

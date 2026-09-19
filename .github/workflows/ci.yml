@@ -24,9 +24,15 @@ jobs:
           python-version: "3.13"
           enable-cache: true
       - run: uv sync --locked
+      - run: uv lock --check
+      - name: Check package and CLI versions agree
+        run: |
+          uv run --locked python -c 'import subprocess, tomllib, frogify; from pathlib import Path; version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]; assert version == frogify.__version__; assert subprocess.check_output(["frogify", "--version"], text=True).strip() == "frogify " + version'
       - run: uv run --locked ruff check .
       - run: uv run --locked ruff format --check .
       - run: uv run --locked pyright
+      - run: |
+          for script in install.sh packaging/*.sh; do sh -n "$script"; done
       - name: Check release tag matches package version
         if: github.event_name == 'release'
         env:
@@ -80,3 +86,50 @@ jobs:
       - name: Require real integration-test tools
         run: uv run --locked python -c "import shutil; missing = [tool for tool in ('ffmpeg', 'ffprobe', 'aria2c') if not shutil.which(tool)]; assert not missing, missing"
       - run: uv run --locked pytest -ra
+
+  linux-binary:
+    name: Standalone Linux x86_64 / glibc 2.17
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.10"
+          python-version: "3.13"
+          enable-cache: true
+      - name: Build in pinned official manylinux2014 image
+        run: |
+          docker build -f packaging/Dockerfile -t frogify-linux-builder .
+          docker run --rm -v "$GITHUB_WORKSPACE:/src" frogify-linux-builder
+      - name: Validate archive on CentOS 7 / glibc 2.17
+        run: |
+          version=$(uv run --locked python -c 'import frogify; print(frogify.__version__)')
+          docker run --rm --network none \
+            -e FROGIFY_EXPECTED_VERSION="$version" \
+            -v "$GITHUB_WORKSPACE/dist/binary:/artifacts:ro" \
+            -v "$GITHUB_WORKSPACE/packaging/smoke-linux.sh:/smoke.sh:ro" \
+            centos@sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4 \
+            sh -c 'test "$(getconf GNU_LIBC_VERSION)" = "glibc 2.17" && sh /smoke.sh'
+      - name: Validate without Python in clean Debian
+        run: |
+          version=$(uv run --locked python -c 'import frogify; print(frogify.__version__)')
+          docker run --rm --network none \
+            -e FROGIFY_EXPECTED_VERSION="$version" \
+            -v "$GITHUB_WORKSPACE/dist/binary:/artifacts:ro" \
+            -v "$GITHUB_WORKSPACE/packaging/smoke-linux.sh:/smoke.sh:ro" \
+            debian@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171 \
+            sh -c '! command -v python && ! command -v python3 && sh /smoke.sh'
+      - name: Test installer with fixtures and the built release
+        env:
+          FROGIFY_TEST_ARTIFACT_DIR: ${{ github.workspace }}/dist/binary
+        run: uv run --locked pytest -ra tests/test_installer.py
+      - name: Require complete standalone distribution compliance
+        run: uv run --locked python packaging/notices.py --check-release dist/linux/inventory.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: linux-binary
+          path: dist/binary/*
+          if-no-files-found: error

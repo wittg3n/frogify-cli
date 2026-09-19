@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.2.0
+
+First public pre-1.0 release candidate; not yet published.
+
+- Correct the unpublished project version from 2.0.0 to 0.2.0.
+- Require complete query identity for automatic selection; preserve explicit manual picks.
+- Preserve current SQLite retry records during additive legacy CSV imports.
+- Fall back to Requests on aria2 process-start failures in automatic mode, and report
+  aria2 as required when explicitly configured.
+- Inspect ambiguous downloaded payloads with Mutagen so WAV audio retains its format.
+- Exclude recognized artist credits from recording qualifiers and reject missing CSV values.
+- Prepare the Linux x86_64 glibc 2.17 standalone build, verified installer, dependency inventory,
+  license materials and Mutagen source. Publication remains blocked pending the documented
+  native-source and combined-distribution license review.
+- Require pytest 9.0.3 or newer to address CVE-2025-71176; no fixed 8.x release is available.
 - Clarify Spotify/YouTube Music downloader positioning, explain CSV-based Spotify support,
   and tighten the README's product-first layout and installation hierarchy.
 - Prepare the first public release with a shorter README, terminal demo, installation and usage
@@ -27,11 +42,8 @@
 - Restrict source packaging to application files, tests, and release metadata. Expand lint and
   type checks to both packages and add service, file-safety, configuration, and transfer tests.
 
-## 2.0.0
-
 - Renamed the product and global command to Frogify.
 - Added root-query, search, batch, retry, config, and doctor commands.
 - Added platform-specific TOML configuration and canonical SQLite state.
-- Added idempotent import of legacy success and failure CSV files.
 - Preserved the proven MP3Juice, Theta/ThetaCloud, aria2, requests, matching,
   validation, metadata, and bounded retry behavior behind typed boundaries.

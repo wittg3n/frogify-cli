@@ -793,9 +793,7 @@ class MP3JuiceMusicClient:
                     cookies=self.session.cookies,
                     progress_callback=progress_callback,
                 )
-                # Theta explicitly converts YouTube to mp3. For the final CDN
-                # response aria2 does not expose Content-Type through tellStatus,
-                # so extension inference can safely fall back to URL/default mp3.
+                # aria2 does not expose Content-Type; inspect the payload later.
                 return contents, metadata, "", url
             except (Aria2Unavailable, Aria2TransferError, requests.RequestException) as exc:
                 if engine == "aria2":
@@ -1048,7 +1046,8 @@ class MP3JuiceMusicClient:
         ext = guess_extension(
             effective_url,
             content_type,
-            default="mp3",
+            default="",
+            data=contents,
         )
 
         return SongInfo(

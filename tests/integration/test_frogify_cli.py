@@ -40,7 +40,7 @@ class FakeService:
 
 def test_cli_version_and_help():
     assert runner.invoke(cli.app, ["--version"]).exit_code == 0
-    assert "frogify 2.0.0" in runner.invoke(cli.app, ["--version"]).stdout
+    assert "frogify 0.2.0" in runner.invoke(cli.app, ["--version"]).stdout
     assert runner.invoke(cli.app, ["--help"]).exit_code == 0
 
 
