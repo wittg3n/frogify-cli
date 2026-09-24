@@ -1,0 +1,291 @@
+{
+  "image": "quay.io/pypa/manylinux2014_x86_64@sha256:21c37461985655aaa25ed3a923b28e6c9d4dd9e10edc0281eb50385184bddd31",
+  "provenance": "CentOS RPMs and SRPMs authenticated with the pinned image RPM key (24c6a8a7f4a80eb5); SHA-256 pins below recorded after successful rpm -K. Non-RPM source pins match official pypa/manylinux docker/Dockerfile blob b5771fbe1cc255c71d2fa855febe80d4c2c2fa27. Binary hashes are from the reproduced pinned-image Analysis inputs.",
+  "components": [
+    {
+      "name": "bzip2-libs",
+      "version": "1.0.6-13.el7",
+      "license": "bzip2-1.0.6",
+      "package_license": "BSD",
+      "source_rpm": "bzip2-1.0.6-13.el7.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/os/Source/SPackages/bzip2-1.0.6-13.el7.src.rpm",
+        "sha256": "132b1a84977f5491075073413c42be1d08e20296849efe203b7482c18f9c96b7"
+      },
+      "source_required": false,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/os/x86_64/Packages/bzip2-libs-1.0.6-13.el7.x86_64.rpm",
+          "sha256": "1fd32866a2a82f5abc19142b59dce8fd961bc1d32e3bedfa0de7a950066fdaa5",
+          "members": [
+            "usr/share/doc/bzip2-libs-1.0.6/LICENSE"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libbz2.so.1": "a273e5044bbdaedf9c361c080e5d0005bba17465036f4418546abb30e93cb444"
+      },
+      "obligations": "Retain the copyright, conditions and disclaimer."
+    },
+    {
+      "name": "libffi",
+      "version": "3.0.13-19.el7",
+      "license": "MIT",
+      "package_license": "MIT and Public Domain",
+      "source_rpm": "libffi-3.0.13-19.el7.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/os/Source/SPackages/libffi-3.0.13-19.el7.src.rpm",
+        "sha256": "32e2d46c0e249b6c370600effe8ccc576b4cd0dbccf5e58206fd05182756f8a8"
+      },
+      "source_required": false,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/os/x86_64/Packages/libffi-3.0.13-19.el7.x86_64.rpm",
+          "sha256": "670463ed744b7243cfe32f0c4aa6676657a6078a6e2009a51fdb7b907b98ef71",
+          "members": [
+            "usr/share/doc/libffi-3.0.13/LICENSE"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libffi.so.6": "af4ed7088fc6c9dd07628ba47534746412c051a4864189fb9308be5b8c1b2308"
+      },
+      "obligations": "Retain the copyright and permission notice."
+    },
+    {
+      "name": "libgcc",
+      "version": "4.8.5-44.el7",
+      "license": "GPL-3.0-or-later WITH GCC-exception-3.1",
+      "package_license": "GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions and LGPLv2+ and BSD",
+      "source_rpm": "gcc-4.8.5-44.el7.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/os/Source/SPackages/gcc-4.8.5-44.el7.src.rpm",
+        "sha256": "642c4085f6af9565e39583e54a9d7a5d9e6b93dd8c8e9474aec8a892d6c7aa36"
+      },
+      "source_required": true,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/os/x86_64/Packages/libgcc-4.8.5-44.el7.x86_64.rpm",
+          "sha256": "cb1967fba485ad3da345e33018c0e8b367359f251c6b1a8847a4976579d74ffa",
+          "members": [
+            "usr/share/doc/libgcc-4.8.5/COPYING.RUNTIME",
+            "usr/share/doc/libgcc-4.8.5/COPYING3"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libgcc_s.so.1": "8f148d8b7ed050f93064fafca6df434706844cf8346d5feed8ecce8c67f39c68"
+      },
+      "obligations": "Retain GPLv3 and GCC Runtime Library Exception 3.1. Exact GCC source RPM is supplied for the separately bundled runtime; the exception does not waive unrelated dependency terms."
+    },
+    {
+      "name": "libstdc++",
+      "version": "4.8.5-44.el7",
+      "license": "GPL-3.0-or-later WITH GCC-exception-3.1",
+      "package_license": "GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions and LGPLv2+ and BSD",
+      "source_rpm": "gcc-4.8.5-44.el7.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/os/Source/SPackages/gcc-4.8.5-44.el7.src.rpm",
+        "sha256": "642c4085f6af9565e39583e54a9d7a5d9e6b93dd8c8e9474aec8a892d6c7aa36"
+      },
+      "source_required": true,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/os/x86_64/Packages/libgcc-4.8.5-44.el7.x86_64.rpm",
+          "sha256": "cb1967fba485ad3da345e33018c0e8b367359f251c6b1a8847a4976579d74ffa",
+          "members": [
+            "usr/share/doc/libgcc-4.8.5/COPYING.RUNTIME",
+            "usr/share/doc/libgcc-4.8.5/COPYING3"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libstdc++.so.6": "96a194736910635516c40193128d2df2d7b3c3753456cde40d8b9d4d12684752"
+      },
+      "obligations": "Retain GPLv3 and GCC Runtime Library Exception 3.1. Exact GCC source RPM is supplied for the separately bundled runtime; the exception does not waive unrelated dependency terms."
+    },
+    {
+      "name": "libuuid",
+      "version": "2.23.2-65.el7_9.1",
+      "license": "BSD-3-Clause",
+      "package_license": "BSD",
+      "source_rpm": "util-linux-2.23.2-65.el7_9.1.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/updates/Source/SPackages/util-linux-2.23.2-65.el7_9.1.src.rpm",
+        "sha256": "aa85c8f6443d8843a3b5c3ed23f38e42f5bc5d4818e650aad5ba1048a7e413b2"
+      },
+      "source_required": false,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/updates/x86_64/Packages/libuuid-2.23.2-65.el7_9.1.x86_64.rpm",
+          "sha256": "f530a65c0efca53f618f63e02801129283b12266fbf21ac221e35617a45b0d4b",
+          "members": [
+            "usr/share/doc/libuuid-2.23.2/COPYING"
+          ]
+        },
+        {
+          "url": "https://vault.centos.org/7.9.2009/updates/Source/SPackages/util-linux-2.23.2-65.el7_9.1.src.rpm",
+          "sha256": "aa85c8f6443d8843a3b5c3ed23f38e42f5bc5d4818e650aad5ba1048a7e413b2",
+          "inner": "util-linux-2.23.2.tar.xz",
+          "members": [
+            "util-linux-2.23.2/Documentation/licenses/COPYING.BSD-3",
+            "util-linux-2.23.2/libuuid/src/gen_uuid.c",
+            "util-linux-2.23.2/libuuid/src/uuid.h"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libuuid.so.1": "f64cda11e1ee1edff303fb180a894f30de1944991a60d7234f88ae6918c062eb"
+      },
+      "obligations": "Retain libuuid copyright notices, BSD conditions and disclaimer, including the full text referenced by the packaged COPYING."
+    },
+    {
+      "name": "ncurses-libs",
+      "version": "5.9-14.20130511.el7_4",
+      "license": "MIT",
+      "package_license": "MIT",
+      "source_rpm": "ncurses-5.9-14.20130511.el7_4.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/os/Source/SPackages/ncurses-5.9-14.20130511.el7_4.src.rpm",
+        "sha256": "7250cb2d8e0dbaf1ec64be098662858486948eb53c3e924b9de873e40857b236"
+      },
+      "source_required": false,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/os/x86_64/Packages/ncurses-base-5.9-14.20130511.el7_4.noarch.rpm",
+          "sha256": "9b008b5d10b431676ac53ee028c3f4349cc56b9f8dc831569b9ac95d1603c802",
+          "members": [
+            "usr/share/doc/ncurses-base-5.9/README"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libtinfo.so.5": "10270e321971666a3b27de37b591122ea1182fcf9e0aad250f82d5c8c399c346"
+      },
+      "obligations": "Retain the ncurses copyright and permission notice from the matching ncurses-base subpackage; its source RPM matches ncurses-libs."
+    },
+    {
+      "name": "openssl",
+      "version": "3.5.8",
+      "license": "Apache-2.0",
+      "source": {
+        "url": "https://github.com/openssl/openssl/releases/download/openssl-3.5.8/openssl-3.5.8.tar.gz",
+        "sha256": "a8f84a39918ec6415ce765d9b429d313ba97b8143169c172e734b9514464f5b2"
+      },
+      "source_required": false,
+      "license_evidence": [
+        {
+          "url": "https://github.com/openssl/openssl/releases/download/openssl-3.5.8/openssl-3.5.8.tar.gz",
+          "sha256": "a8f84a39918ec6415ce765d9b429d313ba97b8143169c172e734b9514464f5b2",
+          "members": [
+            "openssl-3.5.8/LICENSE.txt",
+            "openssl-3.5.8/AUTHORS.md"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libcrypto.so.3": "4a5569f91572f45f7a55b7a982f776c8d461f4df92dab2674a3248b8309a5461",
+        "libssl.so.3": "b74bef24347031572277a4c5475f9bee50dfbaffdb5de42f7ab65895c9ee9152"
+      },
+      "obligations": "Retain applicable copyright, license and attribution texts."
+    },
+    {
+      "name": "readline",
+      "version": "6.2-11.el7",
+      "license": "GPL-3.0-or-later",
+      "package_license": "GPLv3+",
+      "source_rpm": "readline-6.2-11.el7.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/os/Source/SPackages/readline-6.2-11.el7.src.rpm",
+        "sha256": "9678eb2f67b1784e5fba3ed0d59cba3ce6f3a3936936dfae956f7aed44b4cbf0"
+      },
+      "source_required": true,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/os/x86_64/Packages/readline-6.2-11.el7.x86_64.rpm",
+          "sha256": "d9e52b61beb1ac9c3006604d9ebd4f930f667b64478a61fd78de7ed74922f52e",
+          "members": [
+            "usr/share/doc/readline-6.2/COPYING"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libreadline.so.6": "2c5f7b8d6d8a257f08a05f931d6f2c0806dacb368755083f203149ea45222140"
+      },
+      "obligations": "Include GPLv3, copyright notices, exact source RPM with patches and build/install specification. GPLv3 sections 1, 5 and 6 also require resolving the corresponding-source scope of the combined executable."
+    },
+    {
+      "name": "sqlite",
+      "version": "3.53.4",
+      "license": "LicenseRef-SQLite-Public-Domain",
+      "source": {
+        "url": "https://www.sqlite.org/2026/sqlite-autoconf-3530400.tar.gz",
+        "sha256": "0e9483900e92cd5de8fd48d16bf9200145a61f7fd5be542a5ac81d8a9516eb9c"
+      },
+      "source_required": false,
+      "license_evidence": [
+        {
+          "url": "https://www.sqlite.org/2026/sqlite-autoconf-3530400.tar.gz",
+          "sha256": "0e9483900e92cd5de8fd48d16bf9200145a61f7fd5be542a5ac81d8a9516eb9c",
+          "members": [
+            "sqlite-autoconf-3530400/sqlite3.h"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libsqlite3.so": "87a5017f52d0b691793e295352cf8089d412c84446dd73c3c08a15230d03e52d"
+      },
+      "obligations": "sqlite3.h contains the upstream copyright disclaimer/public-domain statement; no conventional copyright license is substituted."
+    },
+    {
+      "name": "xz-libs",
+      "version": "5.2.2-2.el7_9",
+      "license": "LicenseRef-XZ-Public-Domain",
+      "package_license": "LGPLv2+",
+      "source_rpm": "xz-5.2.2-2.el7_9.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/updates/Source/SPackages/xz-5.2.2-2.el7_9.src.rpm",
+        "sha256": "0d2e8869dac71d85de14a678e54c2a4bb4e7bd8a059b18d09523a2dabd81207f"
+      },
+      "source_required": false,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/updates/x86_64/Packages/xz-libs-5.2.2-2.el7_9.x86_64.rpm",
+          "sha256": "4b698de5fd7e0a64306106f3018e9d00dedc1f7a46d354339f012c97d004bd0c",
+          "members": [
+            "usr/share/doc/xz-libs-5.2.2/COPYING"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "liblzma.so.5": "004595caeadc46cef395bcd75452e6208926f91622ab6537bc5aa14cee9dd890"
+      },
+      "obligations": "COPYING explicitly identifies liblzma as public domain; the GPL/LGPL tools and scripts are not bundled."
+    },
+    {
+      "name": "zlib",
+      "version": "1.2.7-21.el7_9",
+      "license": "zlib",
+      "package_license": "zlib and Boost",
+      "source_rpm": "zlib-1.2.7-21.el7_9.src.rpm",
+      "source": {
+        "url": "https://vault.centos.org/7.9.2009/updates/Source/SPackages/zlib-1.2.7-21.el7_9.src.rpm",
+        "sha256": "706518173d35e91b24ac5eee986d074ba9e200c67f26a9028c2e4c1c9713c13c"
+      },
+      "source_required": false,
+      "license_evidence": [
+        {
+          "url": "https://vault.centos.org/7.9.2009/updates/x86_64/Packages/zlib-1.2.7-21.el7_9.x86_64.rpm",
+          "sha256": "2bee86d12902723756eafa82ba6cc322136c4a67a78e0104ac988e14eb7fb5a1",
+          "members": [
+            "usr/share/doc/zlib-1.2.7/README"
+          ]
+        }
+      ],
+      "native_sha256": {
+        "libz.so.1": "4e3ca1c7bba1a94c25710fd51a3c4f219f459768cc948dcada941ad1431c0fbb"
+      },
+      "obligations": "Retain the zlib copyright and permission notice. RPM also declares Boost for unbundled source. The x86_64 library uses the zlib terms."
+    }
+  ]
+}

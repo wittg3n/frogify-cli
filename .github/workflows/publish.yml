@@ -1,8 +1,8 @@
 name: Publish release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags: ["v*"]
 
 permissions:
   contents: read
@@ -15,10 +15,13 @@ jobs:
     name: Attach verified distributions
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: dist
@@ -27,12 +30,26 @@ jobs:
         with:
           name: linux-binary
           path: binary
-      - name: Upload Python distributions and standalone Linux archive
+      - name: Verify and publish the complete release from a draft
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$RELEASE_TAG" dist/* binary/* --clobber
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -eu
+          python3 packaging/release_set.py check binary
+          python3 -c 'import json, os; from pathlib import Path; manifest = json.loads(Path("binary/release-set.json").read_text()); assert os.environ["RELEASE_TAG"] == "v" + manifest["version"]'
+          if gh release view "$RELEASE_TAG" --json isDraft > release.json; then
+            test "$(jq -r .isDraft release.json)" = true
+          else
+            printf 'Linux binary and corresponding source are paired assets below.\nDownload the source archive and its checksum from this same release.\n' > release-notes.txt
+            gh release create "$RELEASE_TAG" --draft --verify-tag --title "$RELEASE_TAG" --notes-file release-notes.txt
+          fi
+          gh release upload "$RELEASE_TAG" binary/frogify-linux-x86_64-sources.tar.gz binary/frogify-linux-x86_64-sources.tar.gz.sha256 --clobber
+          gh release upload "$RELEASE_TAG" binary/frogify-linux-x86_64.tar.gz binary/frogify-linux-x86_64.tar.gz.sha256 binary/release-set.json dist/* --clobber
+          gh release download "$RELEASE_TAG" --dir verified-release --pattern 'frogify-linux-*' --pattern release-set.json
+          python3 packaging/release_set.py check verified-release
+          gh release edit "$RELEASE_TAG" --draft=false
 
   pypi:
     name: Publish to PyPI

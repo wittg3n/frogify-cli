@@ -14,13 +14,15 @@ python -m pip install --require-hashes -r /tmp/frogify-build-requirements.txt
 uv export --locked --no-dev --group binary-build --no-emit-project \
     --format requirements-txt --output-file /tmp/frogify-requirements.txt
 python -m pip install --require-hashes --no-build-isolation -r /tmp/frogify-requirements.txt
+# Build verified runtime wheels outside the environment analyzed by PyInstaller.
+uv export --locked --no-dev --group binary-build --prune ninja --prune scikit-build-core \
+    --no-emit-project --format requirements-txt --output-file /tmp/frogify-freeze-requirements.txt
+python -m pip wheel --require-hashes --no-build-isolation \
+    -r /tmp/frogify-freeze-requirements.txt --wheel-dir /tmp/frogify-wheels
+uv venv --python "$(command -v python)" /tmp/frogify-freeze
+uv pip install --python /tmp/frogify-freeze/bin/python --no-index /tmp/frogify-wheels/*.whl
 output=${FROGIFY_DIST_DIR:-dist}
-python -m PyInstaller --clean --noconfirm --distpath "$output/linux" \
+/tmp/frogify-freeze/bin/python -m PyInstaller --clean --noconfirm --distpath "$output/linux" \
     --workpath build/pyinstaller packaging/frogify.spec
-mkdir -p "$output/binary"
-tar --mtime=@946684800 --mode=755 --owner=0 --group=0 --numeric-owner \
-    -C "$output/linux" -cf "$output/binary/frogify-linux-x86_64.tar" \
-    frogify THIRD_PARTY_NOTICES.md inventory.json licenses sources
-gzip -n -f "$output/binary/frogify-linux-x86_64.tar"
-cd "$output/binary"
-sha256sum frogify-linux-x86_64.tar.gz > frogify-linux-x86_64.tar.gz.sha256
+/tmp/frogify-freeze/bin/python packaging/release_set.py build "$output/linux" \
+    --output "$output/binary"

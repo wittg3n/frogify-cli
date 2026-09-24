@@ -15,9 +15,13 @@ mkdir -p "$HOME"
 cd /artifacts
 sha256sum -c frogify-linux-x86_64.tar.gz.sha256
 tar -tzf frogify-linux-x86_64.tar.gz > "$work/members"
-for member in frogify THIRD_PARTY_NOTICES.md inventory.json licenses/ sources/; do
+for member in frogify THIRD_PARTY_NOTICES.md inventory.json licenses/; do
     grep -qx "$member" "$work/members"
 done
+if grep -q '^sources/' "$work/members"; then
+    echo 'Source archives must travel in the paired source asset.' >&2
+    exit 1
+fi
 tar -xzf frogify-linux-x86_64.tar.gz -C "$work"
 cd "$work"
 [ "$(./frogify --version)" = "frogify $FROGIFY_EXPECTED_VERSION" ]

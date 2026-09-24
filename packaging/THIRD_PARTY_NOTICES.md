@@ -1,43 +1,65 @@
 # Standalone distribution notices
 
-Frogify's own source remains MIT licensed; see `licenses/frogify/0-LICENSE`.
-The executable contains third-party Python modules, CPython, a PyInstaller
-bootloader, and native libraries. It is not an MIT-only distribution.
+Frogify's own source remains MIT licensed. The executable contains third-party
+components under their own terms. Exact versions, license origins, source hashes,
+native ownership and obligations are recorded in `inventory.json`. Keep this
+document, the inventory and `licenses/` with the executable when redistributing it.
 
-`inventory.json` is generated from the actual PyInstaller Analysis tables and
-installed distribution/RPM metadata. It records versions, declared licenses,
-bundled native files, copied license texts, and missing materials. It deliberately
-does not substitute an entire RPM's license declaration for a reviewed conclusion
-about a particular shared library. Build-machine paths are not included.
+## Corresponding source
 
-Package license texts are under `licenses/`. The unmodified Mutagen and certifi source
-archives are supplied under `sources/`, verified against the source hashes in `uv.lock`.
-Keep these materials with any copy of this candidate. Sources are provided directly;
-this document is not a written source offer.
+The binary installation archive and its complete corresponding-source archive
+are paired assets on the same versioned release:
 
-## Publication blocker
+- [v0.2.0 release](https://github.com/wittg3n/frogify-cli/releases/tag/v0.2.0)
+- [Corresponding source](https://github.com/wittg3n/frogify-cli/releases/download/v0.2.0/frogify-linux-x86_64-sources.tar.gz)
 
-The standalone candidate must not be published yet. Review the distribution terms
-for the combined executable containing Mutagen (GPL-2.0-or-later) and GNU readline
-(GPL-3.0-or-later). Verify complete corresponding source and build/install materials
-for all applicable GPL/LGPL components, including the exact native-library builds.
-Merely linking upstream homepages or shipping Frogify's sdist is not a substitute
-for those materials. Missing native license texts listed in the generated inventory
-must also be supplied. No conclusion that Frogify's own MIT source must be relicensed
-is made here.
+These describe the required publication location for this prepared candidate;
+building the candidate does not publish that release. The release workflow keeps
+the release in draft until both assets and their checksums have been uploaded and
+verified. Both must remain available together, with equivalent free download
+access. Recipients do not have to download the source to install the executable.
+Redistributors must preserve equivalent source access, not merely copy this URL
+without providing the required materials.
 
-`python packaging/notices.py --check-release <inventory.json>` fails while these
-items remain unresolved. CI invokes it before release uploads and PyPI publication.
-Resolve the concrete materials and distribution terms through a reviewed patch;
-do not bypass the check with an environment flag.
+Mutagen is GPL-2.0-or-later. This combined standalone distribution uses the later
+GPLv3 terms permitted by that grant; both its original COPYING and the GPLv3 text
+are supplied. GPLv3 section 6(d) permits equivalent network access to corresponding
+source without requiring recipients to download it. GPLv2 section 3 also describes
+equivalent source access at the same designated place. certifi's MPL-2.0 section
+3.2 requires source availability and directions for obtaining it. The paired source
+asset supplies those materials directly; this is not a written source offer.
 
-## Authoritative references
+The current presence of Mutagen drives a conservative complete-source policy for
+the combined executable. This is recomputed from the actual component inventory;
+it is not a leftover readline requirement. Individually permissive components are
+not marked as independently requiring source. Their sources are supplied as part
+of the combined distribution's complete source and build materials.
 
-- [Mutagen license and source](https://github.com/quodlibet/mutagen/blob/main/COPYING)
-- [GPL version 2, section 3](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
-- [GPL version 3, sections 5 and 6](https://www.gnu.org/licenses/gpl-3.0.html)
-- [PyInstaller license and bootloader exception](https://pyinstaller.org/en/stable/license.html)
-- [Official manylinux build sources](https://github.com/pypa/manylinux)
+## Retained components
 
-PyInstaller's exception does not waive dependency license obligations. FFmpeg,
-ffprobe and aria2 are external executables and are not part of this archive.
+- Mutagen inspects audio in memory. Its locked source archive is compared with
+  installed Python sources before collection succeeds.
+- RapidFuzz's supported Python implementation preserves the existing matching
+  algorithms. Native RapidFuzz extensions and GCC runtimes are not bundled.
+- CPython includes its license and embedded notices, including Expat, libmpdec
+  and hashing code. The source asset includes its source and image build recipes.
+- PyInstaller's bootloader license and exception are included. The exception
+  does not waive obligations for unrelated components.
+- OpenSSL 3.5.8 uses Apache-2.0. Its source LICENSE and AUTHORS are included.
+  SQLite retains its upstream public-domain disclaimer. Other native and Python
+  package terms are recorded individually, without deriving licenses from names.
+- Readline, setuptools, bzip2 and XZ/liblzma are absent from the frozen runtime.
+
+The normal installer downloads only the binary archive and checksum. It saves
+notices and licenses under `${XDG_DATA_HOME:-$HOME/.local/share}/frogify/0.2.0/`,
+independently of a custom executable installation directory.
+
+## Verification
+
+`python packaging/notices.py --check-release dist/linux/inventory.json` validates
+the complete staging tree. `python packaging/release_set.py check dist/binary`
+validates both distribution assets, their checksums, identical inventories,
+version and every required evidence file. Readiness is computed from blockers;
+neither this document nor the release manifest overrides a failed check.
+
+FFmpeg, ffprobe and aria2c remain external tools and are not included.

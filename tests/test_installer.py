@@ -64,6 +64,13 @@ esac
         member = tarfile.TarInfo("licenses/fixture/LICENSE")
         member.size = len(notice)
         archive.addfile(member, io.BytesIO(notice))
+        for name, data in (
+            ("THIRD_PARTY_NOTICES.md", b"fixture notices"),
+            ("inventory.json", b'{"version": "0.2.0"}'),
+        ):
+            member = tarfile.TarInfo(name)
+            member.size = len(data)
+            archive.addfile(member, io.BytesIO(data))
     digest = hashlib.sha256((tmp_path / ARCHIVE).read_bytes()).hexdigest()
     (tmp_path / "checksum").write_text(f"{digest}  {ARCHIVE}\n")
     (tmp_path / "temporary").mkdir()
@@ -77,7 +84,7 @@ esac
     return tmp_path, env, content
 
 
-def install(release, **overrides):
+def install(release, *, timeout=15, **overrides):
     root, env, _ = release
     result = subprocess.run(
         ["/bin/sh", str(INSTALLER)],
@@ -85,7 +92,7 @@ def install(release, **overrides):
         cwd=root,
         capture_output=True,
         text=True,
-        timeout=15,
+        timeout=timeout,
     )
     assert not list((root / "temporary").iterdir())
     assert not list(root.glob("installed bin/.frogify-install.*"))
@@ -104,12 +111,17 @@ def test_install_and_reinstall(release, arch, version):
     assert result.returncode == 0, result.stderr
     binary = Path(env["FROGIFY_INSTALL_DIR"]) / "frogify"
     assert binary.read_bytes() == content
+    notice_dir = root / "home/.local/share/frogify/0.2.0"
+    assert (notice_dir / "licenses/fixture/LICENSE").read_bytes() == b"fixture license notice"
+    assert (notice_dir / "inventory.json").is_file()
+    assert (notice_dir / "THIRD_PARTY_NOTICES.md").is_file()
     assert os.access(binary, os.X_OK)
     assert "Checksum verified." in result.stdout
     assert "Add this directory to your PATH:" in result.stdout
     urls = (root / "urls").read_text()
     assert f"/releases/download/v0.2.0/{ARCHIVE}" in urls
     assert ("/releases/latest" in urls) == (not version)
+    assert "-sources.tar.gz" not in urls
     binary.write_text("old binary")
     assert install(release, FROGIFY_VERSION="v0.2.0").returncode == 0
     assert binary.read_bytes() == content
@@ -120,6 +132,54 @@ def test_default_directory(release):
     del env["FROGIFY_INSTALL_DIR"]
     assert install(release).returncode == 0
     assert (root / "home/.local/bin/frogify").read_bytes() == content
+
+
+def test_custom_notice_directory(release):
+    root, _, _ = release
+    data = root / "custom data"
+    assert install(release, XDG_DATA_HOME=str(data)).returncode == 0
+    assert (data / "frogify/0.2.0/licenses/fixture/LICENSE").is_file()
+    assert not (data / "frogify/0.2.0/sources").exists()
+
+
+def test_failed_binary_commit_restores_notices(release):
+    root, env, _ = release
+    assert install(release).returncode == 0
+    binary = Path(env["FROGIFY_INSTALL_DIR"]) / "frogify"
+    binary.write_text("previous binary")
+    notice = root / "home/.local/share/frogify/0.2.0/licenses/fixture/LICENSE"
+    notice.write_text("previous notice")
+    real_mv = shutil.which("mv")
+    replacement = root / "tools/mv"
+    replacement.unlink()
+    replacement.write_text(
+        f'#!/bin/sh\ncase "$*" in */frogify) exit 1;; esac\nexec "{real_mv}" "$@"\n'
+    )
+    replacement.chmod(0o755)
+    assert install(release).returncode != 0
+    assert binary.read_text() == "previous binary"
+    assert notice.read_text() == "previous notice"
+    assert not list(notice.parents[3].glob(".frogify-*"))
+
+
+@pytest.mark.parametrize("failure", ["missing", "empty", "symlink"])
+def test_required_notices_cannot_be_lost(release, failure):
+    root, env, content = release
+    entries = [("frogify", content), ("inventory.json", b"{}"), ("licenses/test/LICENSE", b"MIT")]
+    with tarfile.open(root / ARCHIVE, "w:gz") as archive:
+        for name, data in entries:
+            entry = tarfile.TarInfo(name)
+            entry.size = len(data)
+            archive.addfile(entry, io.BytesIO(data))
+        if failure != "missing":
+            entry = tarfile.TarInfo("THIRD_PARTY_NOTICES.md")
+            if failure == "symlink":
+                entry.type, entry.linkname = tarfile.SYMTYPE, "/etc/passwd"
+            archive.addfile(entry)
+    digest = hashlib.sha256((root / ARCHIVE).read_bytes()).hexdigest()
+    (root / "checksum").write_text(f"{digest}  {ARCHIVE}\n")
+    assert install(release).returncode != 0
+    assert not (Path(env["FROGIFY_INSTALL_DIR"]) / "frogify").exists()
 
 
 @pytest.mark.parametrize("arch", ["aarch64", "arm64", "armv7l", "i686"])
@@ -223,9 +283,18 @@ def test_installs_built_release(release):
     artifacts = Path(os.environ["FROGIFY_TEST_ARTIFACT_DIR"])
     shutil.copyfile(artifacts / ARCHIVE, root / ARCHIVE)
     shutil.copyfile(artifacts / f"{ARCHIVE}.sha256", root / "checksum")
-    result = install(release)
+    # Real runtime and license files take longer to verify than tiny fixtures.
+    result = install(release, timeout=120)
     assert result.returncode == 0, result.stderr
     binary = Path(env["FROGIFY_INSTALL_DIR"]) / "frogify"
     assert binary.read_bytes().startswith(b"\x7fELF")
+    notices = Path(env["HOME"]) / ".local/share/frogify/0.2.0"
+    with tarfile.open(artifacts / ARCHIVE) as archive:
+        for member in archive.getmembers():
+            if member.isfile() and (
+                member.name in {"THIRD_PARTY_NOTICES.md", "inventory.json"}
+                or member.name.startswith("licenses/")
+            ):
+                assert (notices / member.name).read_bytes() == archive.extractfile(member).read()
     for option in ("--version", "--help"):
         subprocess.run([str(binary), option], env=env, cwd=root, check=True, timeout=30)

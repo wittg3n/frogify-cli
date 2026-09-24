@@ -34,9 +34,9 @@ jobs:
       - run: |
           for script in install.sh packaging/*.sh; do sh -n "$script"; done
       - name: Check release tag matches package version
-        if: github.event_name == 'release'
+        if: startsWith(github.ref, 'refs/tags/')
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
           uv run --locked python -c 'import os, tomllib, frogify; from pathlib import Path; version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]; assert os.environ["RELEASE_TAG"] == "v" + version == "v" + frogify.__version__, "Release tag and package versions must match"'
       - run: uv build --no-sources
@@ -125,9 +125,12 @@ jobs:
       - name: Test installer with fixtures and the built release
         env:
           FROGIFY_TEST_ARTIFACT_DIR: ${{ github.workspace }}/dist/binary
-        run: uv run --locked pytest -ra tests/test_installer.py
+          FROGIFY_TEST_EXECUTABLE: ${{ github.workspace }}/dist/linux/frogify
+        run: uv run --locked --group binary-build pytest -ra tests/test_installer.py tests/regression/test_distribution_gate.py tests/regression/test_frozen_cli.py tests/regression/test_frozen_payload.py
       - name: Require complete standalone distribution compliance
-        run: uv run --locked python packaging/notices.py --check-release dist/linux/inventory.json
+        run: |
+          uv run --locked python packaging/notices.py --check-release dist/linux/inventory.json
+          uv run --locked python packaging/release_set.py check dist/binary
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: linux-binary
