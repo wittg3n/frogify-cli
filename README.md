@@ -21,31 +21,30 @@
 
 ## Quick start
 
-On Linux x86_64, install the standalone executable. No Python, pip, uv, or Git is needed:
+Install from source on Windows, macOS, or Linux with **uv** and **Git**. uv manages Python
+3.13 and an isolated environment for Frogify:
 
 ```shell
-curl -fsSL https://raw.githubusercontent.com/wittg3n/frogify-cli/main/install.sh | sh
+uv tool install --python 3.13 "git+https://github.com/wittg3n/frogify-cli.git"
+uv tool update-shell
 ```
-then:
+
+Open a new terminal, then run:
 
 ```shell
 frogify --version
+frogify --help
 frogify doctor
 frogify "Massive Attack - Teardrop"
 ```
 
-The installer uses published GitHub Release assets and installs to `$HOME/.local/bin`.
-Follow its PATH guidance if needed. A release containing the standalone assets must be
-published before this command can install Frogify.
+For uv, Git, and audio tools, follow the [platform setup guide](docs/installation.md#system-dependencies).
+**FFmpeg is required for CSV metadata tagging**, which is enabled by default; aria2 is optional.
+`doctor` checks local tools and provider reachability, so it may report missing tools or
+unavailable providers before your first download.
 
-Version 0.2.0 is an early public pre-1.0 release candidate. Standalone publication is
-currently blocked by the [distribution compliance review](packaging/THIRD_PARTY_NOTICES.md).
-
-The standalone Linux installer currently supports **x86_64 glibc-based Linux distributions**
-(glibc 2.17 or newer), such as Ubuntu, Debian, Linux Mint, Fedora, Rocky Linux, AlmaLinux,
-and CentOS Stream. This does not guarantee every version of these distributions.
-Alpine/musl and ARM64 are not supported by this binary.
-For Windows, macOS, or Python package installation, see [Installation](#installation).
+The project version is **0.2.0**, an early pre-1.0 candidate. The
+[standalone Linux installer](#standalone-linux) requires published GitHub Release assets.
 
 ## Why Frogify?
 
@@ -70,8 +69,11 @@ through supported search sources; it does not download Spotify streams or accept
 # Download a track
 frogify "Massive Attack - Teardrop"
 
-# Search before downloading; add --pick to a download to choose manually
+# Search without downloading
 frogify search "Daft Punk - Something About Us"
+
+# Choose a recording interactively
+frogify "Massive Attack - Teardrop" --pick
 
 # Download a Spotify-exported library, resuming completed tracks
 frogify batch spotify.csv
@@ -81,9 +83,27 @@ frogify retry
 frogify doctor
 ```
 
-Downloads go to **Downloads/music**. Use `--output "./my-music"` to choose another folder.
+By default, downloads go to a **music** subfolder in your system **Downloads** directory.
+Use `--output "./my-music"` for one command, or set `download.directory` for future downloads.
+Batch resume skips completed files that still exist; missing files are downloaded again.
+Retries use each failure's saved destination unless you pass `--output`.
 See the [CSV format](https://github.com/wittg3n/frogify-cli/blob/main/docs/usage.md#download-a-spotify-export-csv)
 for required export columns.
+
+## Configuration
+
+Inspect settings, choose a default destination, or allow more time for provider retries:
+
+```shell
+frogify config
+frogify config path
+frogify config set download.directory "~/Downloads/music"
+frogify config set network.retry_profile patient
+```
+
+To preserve the source audio format in CSV batches, disable metadata tagging with
+`frogify config set metadata.enabled false`. See [all settings](docs/usage.md#configuration)
+for download engines, matching limits, and retry profiles.
 
 ## How matching works
 
@@ -107,31 +127,58 @@ Save audio · CSV batches also write metadata
 
 `search` and `--pick` show the source, duration, and **match score out of 100**. These scores
 are ranking heuristics, not accuracy percentages. Automatic downloads try up to three accepted
-candidates; `--pick` lets you choose explicitly.
+candidates by default. Set `matching.candidate_attempts` to change the limit, or use
+`--candidate-attempts` for a single-track download. `--pick` lets you choose explicitly.
 
 The Spotify downloader workflow uses CSV metadata. The YouTube Music downloader workflow searches
 YouTube recordings through MP3Juice and its resolution providers, alongside SoundCloud; there is
 no official YouTube Music API integration. Free-text downloads preserve the source audio format.
-CSV metadata tagging uses FFmpeg, copying MP3 input without re-encoding and converting other formats.
+CSV metadata tagging uses FFmpeg, copying MP3 input without re-encoding and converting other
+formats to MP3 when tagging is enabled.
 
 ## Installation
 
-Linux users should use the standalone installer in [Quick start](#quick-start).
-Rerun it to update; checksums are mandatory and failed downloads leave the old binary intact.
+### Standalone Linux
+
+Once a [GitHub release](https://github.com/wittg3n/frogify-cli/releases) provides the standalone
+assets, install without Python, pip, uv, or Git:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/wittg3n/frogify-cli/main/install.sh | sh
+```
+
+The binary targets **x86_64 / amd64 glibc-based Linux with glibc 2.17 or newer**.
+ARM64, Alpine/musl, Windows, and macOS need the Python/source route.
+FFmpeg, ffprobe, and optional aria2 remain external tools.
+
+The installer verifies SHA-256 checksums and installs to `$HOME/.local/bin/frogify`.
+Follow its PATH guidance if needed. Rerun it to update; download or validation failures
+preserve the previous executable. Notices, the component inventory, and license texts are
+saved under `${XDG_DATA_HOME:-$HOME/.local/share}/frogify/<version>/`.
+
+Each standalone release pairs the binary with `frogify-linux-x86_64-sources.tar.gz` and
+their checksums. The release workflow validates both assets before publishing; installation
+downloads only the binary archive and its checksum. See the
+[distribution notices](packaging/THIRD_PARTY_NOTICES.md) and
+[source/build instructions](packaging/SOURCE_BUILD.md) for details.
 
 ### Python package installation
 
-For developers and users who explicitly want the Python package (including Windows/macOS),
-use Python 3.12+ in an appropriate environment. Once the PyPI release is available:
+Use the source command in [Quick start](#quick-start), or install from a local checkout
+with uv:
+
+```shell
+git clone https://github.com/wittg3n/frogify-cli.git
+cd frogify-cli
+uv tool install --python 3.13 .
+uv tool update-shell
+```
+
+With an existing Python 3.12+ virtual environment, use `python -m pip install .` from the
+checkout instead. Once the PyPI release is available, you can install by package name:
 
 ```shell
 pip install frogify
-```
-
-Or let **uv** manage Python. Until the PyPI release is available, use the source route:
-
-```shell
-uv tool install --python 3.13 "git+https://github.com/wittg3n/frogify-cli.git"
 ```
 
 **FFmpeg** is required for CSV metadata tagging; **aria2** is optional. Follow the
@@ -159,6 +206,10 @@ for development setup, tests, and pull-request guidelines.
 
 ## License
 
-[MIT](https://github.com/wittg3n/frogify-cli/blob/main/LICENSE). Use Frogify only for audio you are
-permitted to access and in accordance with the relevant service terms. Frogify is not affiliated
-with Spotify, YouTube, YouTube Music, SoundCloud, MP3Juice, or Theta.
+Frogify's own source is [MIT licensed](LICENSE). The standalone executable includes third-party
+components with separate terms; see the [distribution notices](packaging/THIRD_PARTY_NOTICES.md)
+for licenses and corresponding source.
+
+Use Frogify only for audio you are permitted to access and in accordance with the relevant
+service terms. Frogify is not affiliated with Spotify, YouTube, YouTube Music, SoundCloud,
+MP3Juice, or Theta.
