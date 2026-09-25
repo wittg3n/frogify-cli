@@ -1,8 +1,16 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wittg3n/frogify-cli/main/public/logo.png" alt="Frogify logo" width="560">
+</p>
+
 <h1 align="center">Frogify</h1>
 
 <p align="center">
   <strong>Find the right track. Download it. Keep your library clean.</strong><br>
   Spotify &amp; YouTube Music Downloader CLI
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/wittg3n/frogify-cli/main/public/demo.gif" alt="Terminal demo: frogify &quot;Massive Attack - Teardrop&quot; downloads a selected recording and prints the saved path." width="800">
 </p>
 
 ## Installation
@@ -346,14 +354,6 @@ Environment Variables → User variables → Path → Edit → New**, then open 
 For more detail about a command failure, run `frogify --debug search "Artist Track"`.
 
 ## Why Frogify?
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/wittg3n/frogify-cli/main/public/logo.png" alt="Frogify logo" width="560">
-</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/wittg3n/frogify-cli/main/public/demo.gif" alt="Terminal demo: frogify &quot;Massive Attack - Teardrop&quot; downloads a selected recording and prints the saved path." width="800">
-</p>
 
 Finding a result is easy. Frogify tries to find the **right recording**.
 
